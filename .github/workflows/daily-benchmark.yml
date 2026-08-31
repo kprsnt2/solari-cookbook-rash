@@ -1,0 +1,60 @@
+name: Solari Daily Autonomous Benchmark & Verification
+
+on:
+  schedule:
+    # Runs daily at 20:00 UTC (customizable to your preferred time)
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Autonomous Task to Execute'
+        required: false
+        default: 'Build a real-time Markdown live editor with word counter, start dev server on port 3000, and verify it with browser QA'
+      provider:
+        description: 'LLM Provider (openai, anthropic, gemini, groq, simulator)'
+        required: false
+        default: 'openai'
+
+jobs:
+  solari-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Workspace Dependencies
+        run: npm ci || npm install
+
+      - name: Build All Workspaces
+        run: npm run build
+
+      - name: Run Test Suites
+        run: npm test
+
+      - name: Run Autonomous Engineering Benchmark
+        env:
+          SOLARI_API_KEY: ${{ secrets.SOLARI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          npm run agent -- eval
+
+      - name: Run Daily End-to-End Verification Run
+        env:
+          SOLARI_API_KEY: ${{ secrets.SOLARI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          TASK="${{ github.event.inputs.task || 'Build a real-time Markdown live editor with word counter, start dev server on port 3000, and verify it with browser QA' }}"
+          PROVIDER="${{ github.event.inputs.provider || 'openai' }}"
+          echo "Executing task: $TASK with provider: $PROVIDER"
+          npm run agent -- run "$TASK" --provider "$PROVIDER"

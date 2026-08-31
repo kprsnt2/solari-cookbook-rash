@@ -246,27 +246,42 @@
     let ws;
     let stepCount = 0;
 
+    let wsAttempts = 0;
     function connectWS() {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(`${protocol}//${window.location.host}`);
-
-      ws.onopen = () => {
+      if (wsAttempts > 2) {
         document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
-        document.getElementById('ws-status').textContent = 'Live Connected';
-      };
+        document.getElementById('ws-status').textContent = 'Cloud Serverless Mode';
+        return;
+      }
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      try {
+        ws = new WebSocket(`${protocol}//${window.location.host}`);
 
-      ws.onclose = () => {
-        document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-red-400';
-        document.getElementById('ws-status').textContent = 'Disconnected';
-        setTimeout(connectWS, 3000);
-      };
+        ws.onopen = () => {
+          document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
+          document.getElementById('ws-status').textContent = 'Live Connected';
+        };
 
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          handleServerMessage(msg);
-        } catch (e) {}
-      };
+        ws.onclose = () => {
+          wsAttempts++;
+          if (wsAttempts > 2) {
+            document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
+            document.getElementById('ws-status').textContent = 'Cloud Serverless Mode';
+          } else {
+            setTimeout(connectWS, 2000);
+          }
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            handleServerMessage(msg);
+          } catch (e) {}
+        };
+      } catch (err) {
+        document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
+        document.getElementById('ws-status').textContent = 'Cloud Serverless Mode';
+      }
     }
 
     function setTask(taskText) {
@@ -315,9 +330,13 @@
           body: JSON.stringify({ task, provider })
         });
         const result = await res.json();
+        if (result && result.steps) {
+          result.steps.forEach(s => handleServerMessage({ type: 'step', event: s }));
+          handleServerMessage({ type: 'run_complete', result });
+        }
       } catch (err) {
         console.error(err);
-      } finally {
+      }
         runBtn.disabled = false;
         runBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Launch Autonomous Engineer</span>';
       }
