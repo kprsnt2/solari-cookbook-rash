@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solari-Agent — Autonomous Cloud AI Software Engineer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    pre, code, .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .terminal-scroll::-webkit-scrollbar { width: 6px; }
+    .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold">
+        <i class="fa-solid fa-microchip"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-base tracking-tight text-white">Solari-Agent</span>
+          <span class="px-2 py-0.5 text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">v1.0 FLAGSHIP</span>
+        </div>
+        <p class="text-xs text-slate-400">Autonomous Cloud Software Engineer & Verification Platform</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 text-xs font-mono">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-800/80 border border-slate-700/60">
+        <span id="ws-indicator" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="ws-status" class="text-slate-300">Connecting...</span>
+      </div>
+      <a href="https://github.com/solari-sdk/solari-cookbook" target="_blank" class="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition">
+        <i class="fa-brands fa-github"></i>
+        <span>Cookbook</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden">
+    
+    <!-- Left Column: Task Launcher & Agent Timeline (4 cols) -->
+    <div class="col-span-12 lg:col-span-4 flex flex-col gap-5">
+      
+      <!-- Task Input Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <i class="fa-solid fa-terminal text-emerald-400"></i> Autonomous Task
+          </h2>
+          <select id="provider-select" class="text-xs bg-slate-800 border border-slate-700 rounded-md px-2.5 py-1 text-slate-300 focus:outline-none focus:border-emerald-500 font-mono">
+            <option value="simulator">Solari Simulator (Offline/Demo)</option>
+            <option value="anthropic">Claude 3.7 Sonnet</option>
+            <option value="openai">GPT-4o (OpenAI)</option>
+            <option value="gemini">Gemini 2.5 Flash</option>
+            <option value="groq">Llama 3.3 70B (Groq)</option>
+            <option value="openrouter">OpenRouter Multi-Model</option>
+          </select>
+        </div>
+
+        <div>
+          <textarea id="task-input" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500 placeholder-slate-600 resize-none" placeholder="Describe the software application, test scenario, or backend service to build and verify...">Build a real-time Markdown live editor with word counter, start dev server on port 3000, and verify it with browser QA</textarea>
+        </div>
+
+        <!-- Preset Chips -->
+        <div class="flex flex-wrap gap-1.5 text-[11px]">
+          <button onclick="setTask('Build a real-time Markdown live editor with word counter, start dev server on port 3000, and verify it with browser QA')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded border border-slate-700 transition">
+            Markdown Studio
+          </button>
+          <button onclick="setTask('Create a REST API with health check endpoint and interactive Swagger documentation, expose port 8080')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded border border-slate-700 transition">
+            REST API & Swagger
+          </button>
+          <button onclick="setTask('Deploy a full-stack real-time collaborative canvas with WebSockets and verify drawing')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded border border-slate-700 transition">
+            Realtime Canvas
+          </button>
+        </div>
+
+        <button id="run-btn" onclick="executeTask()" class="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 text-sm">
+          <i class="fa-solid fa-play"></i>
+          <span>Launch Autonomous Engineer</span>
+        </button>
+      </div>
+
+      <!-- Live Execution Timeline -->
+      <div class="flex-1 bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col overflow-hidden min-h-[350px]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-emerald-400"></i> Execution Timeline
+          </h2>
+          <span id="step-counter" class="text-xs font-mono text-slate-500">0 steps</span>
+        </div>
+
+        <div id="timeline-container" class="flex-1 overflow-y-auto terminal-scroll space-y-2.5 pr-1 text-xs">
+          <div class="text-center text-slate-600 py-12 font-mono">
+            Ready to execute. Enter a task and click Launch.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Center/Right Column: Live Preview, Terminal, Browser QA, Cloud Desktop (8 cols) -->
+    <div class="col-span-12 lg:col-span-8 flex flex-col gap-5">
+      
+      <!-- Top Tab Switcher & Status Banner -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex items-center justify-between shadow-xl">
+        <div class="flex items-center gap-1.5 text-xs font-mono">
+          <button id="tab-btn-preview" onclick="switchTab('preview')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center gap-2 transition">
+            <i class="fa-solid fa-globe"></i> Live Preview
+          </button>
+          <button id="tab-btn-terminal" onclick="switchTab('terminal')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-800 flex items-center gap-2 transition">
+            <i class="fa-solid fa-terminal"></i> Sandbox Terminal
+          </button>
+          <button id="tab-btn-qa" onclick="switchTab('qa')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-800 flex items-center gap-2 transition">
+            <i class="fa-solid fa-vial"></i> Browser QA
+          </button>
+          <button id="tab-btn-replay" onclick="switchTab('replay')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-800 flex items-center gap-2 transition">
+            <i class="fa-solid fa-film"></i> rrweb Replay
+          </button>
+          <button id="tab-btn-desktop" onclick="switchTab('desktop')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-800 flex items-center gap-2 transition">
+            <i class="fa-solid fa-desktop"></i> Desktop VNC
+          </button>
+        </div>
+
+        <div id="preview-url-badge" class="hidden text-xs font-mono text-emerald-400 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-md truncate max-w-xs">
+          https://preview.getsolari.com
+        </div>
+      </div>
+
+      <!-- Tab View 1: Live Preview iframe -->
+      <div id="tab-preview" class="tab-pane flex-1 bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col min-h-[500px]">
+        <div class="bg-slate-950 px-4 py-2 border-b border-slate-800 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2 flex-1 mr-4">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
+            <span id="preview-url-input" class="bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-slate-400 flex-1 truncate">
+              about:blank
+            </span>
+          </div>
+          <button onclick="reloadPreview()" class="text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+        <div class="flex-1 bg-slate-950 relative flex items-center justify-center">
+          <iframe id="preview-iframe" class="w-full h-full border-0" src="about:blank"></iframe>
+          <div id="preview-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 gap-3">
+            <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-700"></i>
+            <p class="text-xs font-mono">Dev server port preview will render here automatically upon port exposure.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab View 2: Terminal Stream -->
+      <div id="tab-terminal" class="tab-pane hidden flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 terminal-scroll overflow-y-auto min-h-[500px]">
+        <div id="terminal-content" class="space-y-1">
+          <p class="text-slate-600">// Solari MicroVM Sandbox Terminal Stream</p>
+          <p class="text-slate-600">// Waiting for VM initialization...</p>
+        </div>
+      </div>
+
+      <!-- Tab View 3: Browser QA Results -->
+      <div id="tab-qa" class="tab-pane hidden flex-1 bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col gap-4 overflow-y-auto terminal-scroll min-h-[500px]">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">Playwright Stealth Browser QA Verification</h3>
+            <p class="text-xs text-slate-400">Anti-bot stealth bypass, DOM assertions, and screenshot capture</p>
+          </div>
+          <span id="qa-status-pill" class="px-3 py-1 bg-slate-800 text-slate-400 text-xs font-mono rounded-full">NOT RUN</span>
+        </div>
+
+        <div id="qa-assertions-list" class="space-y-2">
+          <p class="text-xs text-slate-500 font-mono">No assertions run yet.</p>
+        </div>
+
+        <div id="qa-screenshot-container" class="hidden mt-4">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">Captured Page Screenshot</h4>
+          <img id="qa-screenshot-img" class="w-full max-h-72 object-contain bg-slate-950 rounded-lg border border-slate-800" src="" alt="QA Screenshot">
+        </div>
+      </div>
+
+      <!-- Tab View 4: rrweb Session Replay -->
+      <div id="tab-replay" class="tab-pane hidden flex-1 bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col gap-4 overflow-y-auto terminal-scroll min-h-[500px]">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">rrweb DOM Session Recording</h3>
+            <p class="text-xs text-slate-400">Deterministic NDJSON DOM-level event timeline</p>
+          </div>
+          <span id="replay-count-badge" class="px-2.5 py-1 bg-purple-900/50 text-purple-300 border border-purple-700/50 text-xs font-mono rounded-md">0 Events</span>
+        </div>
+
+        <div id="replay-events-list" class="space-y-2 font-mono text-xs">
+          <p class="text-slate-500">Run browser QA with recording to inspect DOM events.</p>
+        </div>
+      </div>
+
+      <!-- Tab View 5: Desktop VNC Stream -->
+      <div id="tab-desktop" class="tab-pane hidden flex-1 bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col gap-4 min-h-[500px]">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">Solari Cloud Desktop Live Stream</h3>
+            <p class="text-xs text-slate-400">X11 Linux desktop environment with live VNC feed</p>
+          </div>
+          <span id="desktop-status-pill" class="px-2.5 py-1 bg-amber-900/50 text-amber-300 border border-amber-700/50 text-xs font-mono rounded-md">STANDBY</span>
+        </div>
+
+        <div class="flex-1 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-center relative overflow-hidden">
+          <div id="desktop-placeholder" class="flex flex-col items-center justify-center text-slate-600 gap-2">
+            <i class="fa-solid fa-desktop text-3xl text-slate-700"></i>
+            <p class="text-xs font-mono">VNC Stream will appear when desktop_vnc_inspect is triggered.</p>
+          </div>
+          <iframe id="desktop-iframe" class="hidden w-full h-full border-0" src="about:blank"></iframe>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    let ws;
+    let stepCount = 0;
+
+    function connectWS() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}`);
+
+      ws.onopen = () => {
+        document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
+        document.getElementById('ws-status').textContent = 'Live Connected';
+      };
+
+      ws.onclose = () => {
+        document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-red-400';
+        document.getElementById('ws-status').textContent = 'Disconnected';
+        setTimeout(connectWS, 3000);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          handleServerMessage(msg);
+        } catch (e) {}
+      };
+    }
+
+    function setTask(taskText) {
+      document.getElementById('task-input').value = taskText;
+    }
+
+    function switchTab(tab) {
+      const tabs = ['preview', 'terminal', 'qa', 'replay', 'desktop'];
+      tabs.forEach(t => {
+        const pane = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          pane.classList.remove('hidden');
+          btn.className = 'px-3.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center gap-2 transition';
+        } else {
+          pane.classList.add('hidden');
+          btn.className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-800 flex items-center gap-2 transition';
+        }
+      });
+    }
+
+    function reloadPreview() {
+      const iframe = document.getElementById('preview-iframe');
+      if (iframe.src && iframe.src !== 'about:blank') {
+        iframe.src = iframe.src;
+      }
+    }
+
+    async function executeTask() {
+      const task = document.getElementById('task-input').value.trim();
+      const provider = document.getElementById('provider-select').value;
+      if (!task) return;
+
+      const runBtn = document.getElementById('run-btn');
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Executing Agent...</span>';
+
+      stepCount = 0;
+      document.getElementById('timeline-container').innerHTML = '';
+      document.getElementById('terminal-content').innerHTML = '<p class="text-emerald-400 font-bold">[Solari Sandbox Initialized]</p>';
+
+      try {
+        const res = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, provider })
+        });
+        const result = await res.json();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Launch Autonomous Engineer</span>';
+      }
+    }
+
+    function handleServerMessage(msg) {
+      if (msg.type === 'step') {
+        const evt = msg.event;
+        stepCount++;
+        document.getElementById('step-counter').textContent = `${stepCount} steps`;
+
+        // Append to timeline
+        const timeline = document.getElementById('timeline-container');
+        const phaseColorMap = {
+          plan: 'text-purple-400 bg-purple-950/40 border-purple-800',
+          sandbox_code: 'text-blue-400 bg-blue-950/40 border-blue-800',
+          sandbox_build: 'text-yellow-400 bg-yellow-950/40 border-yellow-800',
+          sandbox_preview: 'text-emerald-400 bg-emerald-950/40 border-emerald-800',
+          browser_qa: 'text-cyan-400 bg-cyan-950/40 border-cyan-800',
+          desktop_inspect: 'text-amber-400 bg-amber-950/40 border-amber-800',
+          complete: 'text-emerald-400 bg-emerald-900/60 border-emerald-500',
+          error: 'text-red-400 bg-red-950/60 border-red-800'
+        };
+
+        const colorClasses = phaseColorMap[evt.phase] || 'text-slate-400 bg-slate-900 border-slate-800';
+
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-lg border text-xs font-mono ${colorClasses} animate-fade-in`;
+        item.innerHTML = `
+          <div class="flex items-center justify-between font-bold mb-1">
+            <span>[${evt.phase.toUpperCase()}] Step ${evt.step}</span>
+            <span class="text-[10px] text-slate-500">${new Date(evt.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div class="text-slate-200">${evt.action}</div>
+        `;
+        timeline.appendChild(item);
+        timeline.scrollTop = timeline.scrollHeight;
+
+        // Append to terminal
+        const term = document.getElementById('terminal-content');
+        const termLine = document.createElement('p');
+        termLine.className = 'text-slate-300';
+        termLine.textContent = `> [${evt.phase}] ${evt.action}`;
+        term.appendChild(termLine);
+        term.parentElement.scrollTop = term.parentElement.scrollHeight;
+
+        // If preview URL exposed
+        if (evt.details && evt.details.previewUrl) {
+          const url = evt.details.previewUrl;
+          document.getElementById('preview-url-badge').classList.remove('hidden');
+          document.getElementById('preview-url-badge').textContent = url;
+          document.getElementById('preview-url-input').textContent = url;
+          document.getElementById('preview-placeholder').classList.add('hidden');
+          document.getElementById('preview-iframe').src = url;
+        }
+
+        // If desktop session
+        if (evt.details && evt.details.streamUrl) {
+          document.getElementById('desktop-status-pill').className = 'px-2.5 py-1 bg-emerald-900/50 text-emerald-300 border border-emerald-700/50 text-xs font-mono rounded-md';
+          document.getElementById('desktop-status-pill').textContent = 'LIVE VNC STREAM';
+          document.getElementById('desktop-placeholder').classList.add('hidden');
+          const dIframe = document.getElementById('desktop-iframe');
+          dIframe.classList.remove('hidden');
+          dIframe.src = evt.details.streamUrl;
+        }
+      }
+
+      if (msg.type === 'run_complete' && msg.result) {
+        const res = msg.result;
+        if (res.qaResult) {
+          const pill = document.getElementById('qa-status-pill');
+          pill.className = res.qaResult.passed ? 'px-3 py-1 bg-emerald-900 text-emerald-300 border border-emerald-600 text-xs font-mono rounded-full font-bold' : 'px-3 py-1 bg-red-900 text-red-300 border border-red-600 text-xs font-mono rounded-full font-bold';
+          pill.textContent = res.qaResult.passed ? 'PASSED (100%)' : 'FAILED';
+
+          const qaList = document.getElementById('qa-assertions-list');
+          qaList.innerHTML = '';
+          (res.qaResult.assertions || []).forEach(a => {
+            const card = document.createElement('div');
+            card.className = `p-2.5 rounded-md border text-xs font-mono flex items-center justify-between ${a.passed ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300' : 'bg-red-950/30 border-red-800/50 text-red-300'}`;
+            card.innerHTML = `
+              <span>${a.assertion.type}: ${a.assertion.expected || a.assertion.selector || ''}</span>
+              <span class="font-bold">${a.passed ? '✔ PASS' : '✖ FAIL'}</span>
+            `;
+            qaList.appendChild(card);
+          });
+
+          if (res.qaResult.screenshotBase64) {
+            document.getElementById('qa-screenshot-container').classList.remove('hidden');
+            document.getElementById('qa-screenshot-img').src = res.qaResult.screenshotBase64;
+          }
+        }
+
+        if (res.replayEvents && res.replayEvents.length > 0) {
+          document.getElementById('replay-count-badge').textContent = `${res.replayEvents.length} Events`;
+          const replayList = document.getElementById('replay-events-list');
+          replayList.innerHTML = '';
+          res.replayEvents.forEach((ev, i) => {
+            const row = document.createElement('div');
+            row.className = 'p-2 bg-slate-950 border border-slate-800 rounded text-slate-400';
+            row.innerHTML = `<span class="text-purple-400 font-bold">#${i + 1} [Type ${ev.type}]</span> <span class="text-slate-300">${JSON.stringify(ev.data || {})}</span>`;
+            replayList.appendChild(row);
+          });
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', connectWS);
+  </script>
+</body>
+</html>

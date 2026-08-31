@@ -1,0 +1,29 @@
+{
+  "name": "@solari/mcp-server",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server exposing Solari Sandboxes, Cloud Browsers, and Desktops",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "solari-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "@solarisdk/browser": "^0.1.1",
+    "@solarisdk/sdk": "^0.1.2",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
+  }
+}

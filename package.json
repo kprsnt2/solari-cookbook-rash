@@ -1,0 +1,31 @@
+{
+  "name": "solari-cookbook-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Solari Cookbook & Autonomous Agent Orchestration Platform",
+  "type": "module",
+  "workspaces": [
+    "projects/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces --if-present build",
+    "test": "npm run --workspaces --if-present test",
+    "agent": "npm run --workspace=projects/solari-autonomous-engineer start --",
+    "mcp": "npm run --workspace=projects/solari-mcp-server start",
+    "studio": "npm run --workspace=projects/solari-autonomous-engineer studio"
+  },
+  "keywords": [
+    "solari",
+    "ai-agent",
+    "autonomous-engineer",
+    "sandbox",
+    "browser",
+    "desktop",
+    "mcp",
+    "rrweb",
+    "playwright"
+  ],
+  "author": "Prashanth (@kprsnt2 / kprsnt.in)",
+  "license": "MIT"
+}
