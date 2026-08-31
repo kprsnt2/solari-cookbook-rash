@@ -12,6 +12,7 @@
     "build": "npm run --workspaces --if-present build",
     "test": "npm run --workspaces --if-present test",
     "agent": "npm run --workspace=projects/solari-autonomous-engineer start --",
+    "career": "npm run --workspace=projects/solari-autonomous-engineer start -- career",
     "mcp": "npm run --workspace=projects/solari-mcp-server start",
     "studio": "npm run --workspace=projects/solari-autonomous-engineer studio"
   },

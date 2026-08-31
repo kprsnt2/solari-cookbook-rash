@@ -58,3 +58,10 @@ jobs:
           PROVIDER="${{ github.event.inputs.provider || 'openai' }}"
           echo "Executing task: $TASK with provider: $PROVIDER"
           npm run agent -- run "$TASK" --provider "$PROVIDER"
+
+      - name: Run Daily Solari CareerOps Autopilot (AI Job Applications)
+        env:
+          SOLARI_API_KEY: ${{ secrets.SOLARI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          npm run career

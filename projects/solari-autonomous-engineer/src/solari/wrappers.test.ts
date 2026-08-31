@@ -3,6 +3,7 @@ import { SandboxManager } from "./sandbox-manager.js";
 import { BrowserQA } from "./browser-qa.js";
 import { DesktopInspector } from "./desktop-inspector.js";
 import { AutonomousEngineer } from "../agent/orchestrator.js";
+import { CareerAutopilot, PRASHANTH_PROFILE, SAMPLE_LIVE_JOB_TARGETS } from "../career/career-autopilot.js";
 
 describe("Solari SDK Wrappers Suite", () => {
   it("should create sandbox, write/read files, execute commands, and expose preview port", async () => {
@@ -84,5 +85,18 @@ describe("AutonomousEngineer Orchestrator Suite", () => {
     expect(result.replayEvents).toBeDefined();
     expect(result.replayEvents?.length).toBeGreaterThan(0);
     expect(result.finalArtifact).toContain("Deployment Report");
+  });
+});
+
+describe("CareerAutopilot Suite", () => {
+  it("should evaluate candidate profile, tailor application in sandbox, and simulate stealth browser submission", async () => {
+    const autopilot = new CareerAutopilot("mock_key", PRASHANTH_PROFILE);
+    const result = await autopilot.applyToJob(SAMPLE_LIVE_JOB_TARGETS[0], true);
+
+    expect(result.jobId).toBe(SAMPLE_LIVE_JOB_TARGETS[0].id);
+    expect(result.status).toBe("dry_run_passed");
+    expect(result.tailoredAnswers.fullName).toBe("Prashanth Kumar Kadasi");
+    expect(result.tailoredAnswers.portfolio).toBe("https://kprsnt.in");
+    expect(result.rrwebEventsCount).toBeGreaterThan(0);
   });
 });

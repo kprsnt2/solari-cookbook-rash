@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import readline from "node:readline";
 import { Command } from "commander";
 import chalk from "chalk";
 import ora from "ora";
-import readline from "node:readline";
 import { AutonomousEngineer, type LLMProvider } from "./agent/orchestrator.js";
+import { CareerAutopilot, PRASHANTH_PROFILE, SAMPLE_LIVE_JOB_TARGETS } from "./career/career-autopilot.js";
 import type { AgentStepEvent } from "./types.js";
 import { startWebStudioServer } from "./web/server.js";
 
@@ -105,7 +106,7 @@ program
     });
 
     const promptUser = () => {
-      rl.question(chalk.bold.cyan("solari> "), async (input) => {
+      rl.question(chalk.bold.cyan("solari> "), async (input: string) => {
         const trimmed = input.trim();
         if (!trimmed || trimmed === "exit" || trimmed === "quit") {
           rl.close();
@@ -162,6 +163,29 @@ program
     }
 
     console.log(chalk.bold(`Benchmark Results: ${passedCount}/${benchmarkTasks.length} passed (100%)\n`));
+  });
+
+program
+  .command("career")
+  .description("Launch CareerOps Autopilot to evaluate, tailor, and apply to top AI Engineer roles")
+  .option("--live", "Submit live applications instead of dry-run simulation", false)
+  .action(async (options) => {
+    console.log(chalk.bold.hex("#4ADE80")("\n  🎯 Solari CareerOps Autopilot — Autonomous AI Job Application Agent\n"));
+    console.log(chalk.dim(`  Candidate: Prashanth Kumar Kadasi (kprsnt.in | github.com/kprsnt2)`));
+    console.log(chalk.dim(`  Mode: ${options.live ? chalk.red("LIVE APPLICATION SUBMISSION") : chalk.green("DRY-RUN SIMULATION")}\n`));
+
+    const autopilot = new CareerAutopilot(process.env.SOLARI_API_KEY, PRASHANTH_PROFILE, (event) => {
+      formatStep(event);
+    });
+
+    const results = await autopilot.runDailyBatch(SAMPLE_LIVE_JOB_TARGETS, !options.live);
+
+    console.log("\n" + chalk.bold("═".repeat(60)));
+    console.log(chalk.bold.green(`\n  ✔ CareerOps Batch Completed (${results.length} targets processed)\n`));
+    for (const r of results) {
+      console.log(`  • [${r.company}] ${r.jobTitle} ➔ ${chalk.cyan(r.status)} (${r.rrwebEventsCount || 0} rrweb events)`);
+    }
+    console.log(chalk.bold("═".repeat(60)) + "\n");
   });
 
 program.parse(process.argv);
