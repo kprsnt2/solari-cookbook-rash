@@ -4,34 +4,33 @@ Submitting your 4 new cookbook examples directly to the official [solari-sdk/sol
 
 ---
 
-## 📦 What to Submit Upstream
+## 📦 What We Are Contributing Upstream
 
 The official `solari-sdk/solari-cookbook` welcomes self-contained examples that:
-- Run in under 1 minute
+- Run in under 15 seconds
 - Have zero unnecessary frameworks or boilerplate
-- Highlight real developer gotchas in comments
+- Highlight real developer gotchas in comments (e.g. `await solari.close()`, `sandbox.kill()`, `nohup` backgrounding)
 - Are MIT licensed
 
-We have prepared 4 production-ready examples ready for upstream contribution:
+We have prepared 4 production-ready TypeScript cookbook examples:
 
-1. **`examples/autonomous-agent-ts`**: End-to-end full-stack agent cycle (Sandbox + Port Preview + Browser QA + rrweb replay).
-2. **`examples/browser-fullstack-qa-ts`**: Stealth mode, US residential proxy validation, responsive multi-viewport testing.
-3. **`examples/sandbox-dynamic-compiler-ts`**: Isolated TypeScript compilation & Python AST analysis in microVM.
-4. **`examples/solari-career-autopilot-ts`**: Autonomous ATS job application form filler with `rrweb` audit replay.
+1. **`examples/autonomous-agent-ts`**: Full autonomous software engineer loop (Sandbox build ➔ port preview ➔ stealth browser Playwright assertions ➔ rrweb replay download).
+2. **`examples/browser-fullstack-qa-ts`**: Anti-bot stealth mode bypass, US residential proxy egress verification, responsive viewports, and screenshot capture.
+3. **`examples/sandbox-dynamic-compiler-ts`**: Isolated TypeScript compilation, Python AST analysis, and performance benchmarking inside microVM.
+4. **`examples/solari-career-autopilot-ts`**: Real-world autonomous ATS job application agent with verified candidate credentials and rrweb audit logging.
 
 ---
 
 ## 🚀 Step-by-Step PR Submission Instructions
 
-### Step 1: Push branch to your GitHub fork
-```bash
-git checkout -b feat/flagship-cookbook-examples
-git push origin feat/flagship-cookbook-examples
-```
+### Step 1: Open Pull Request on GitHub
+Navigate directly to:
+👉 **[https://github.com/solari-sdk/solari-cookbook/compare/main...kprsnt2:solari-cookbook-rash:main](https://github.com/solari-sdk/solari-cookbook/compare/main...kprsnt2:solari-cookbook-rash:main)**
 
-### Step 2: Open Pull Request on GitHub
-Navigate to:
-`https://github.com/solari-sdk/solari-cookbook/compare/main...kprsnt2:solari-autonomous-platform-v2:main`
+### Step 2: Set the PR Title
+```text
+feat(examples): add autonomous agent, fullstack QA, dynamic compiler, and career autopilot TypeScript examples
+```
 
 ### Step 3: Copy & Paste this PR Description:
 
@@ -40,16 +39,20 @@ Navigate to:
 
 This PR adds 4 new high-value TypeScript cookbook examples demonstrating advanced Solari primitives in real-world autonomous workflows:
 
-1. **`examples/autonomous-agent-ts`**: Full autonomous software engineer loop (Sandbox build ➔ port preview ➔ stealth browser Playwright assertions ➔ rrweb replay download).
-2. **`examples/browser-fullstack-qa-ts`**: Anti-bot stealth mode bypass, US residential proxy egress verification, responsive viewports, and screenshot capture.
-3. **`examples/sandbox-dynamic-compiler-ts`**: Isolated TypeScript compilation, Python AST analysis, and performance benchmarking inside microVM.
-4. **`examples/solari-career-autopilot-ts`**: Real-world autonomous ATS job application agent with verified candidate credentials and rrweb audit logging.
+1. **`examples/autonomous-agent-ts`**: Full autonomous software engineer loop (MicroVM sandbox build ➔ `sandbox.previewUrl` port exposure ➔ stealth browser Playwright assertions ➔ `solari.sessions.downloadReplay` rrweb download).
+2. **`examples/browser-fullstack-qa-ts`**: Anti-bot stealth mode bypass (`stealth: true`), US residential proxy egress verification (`proxy: "us"`), multi-device responsive viewports (Desktop & Mobile iPhone 14), and screenshot capture.
+3. **`examples/sandbox-dynamic-compiler-ts`**: Dynamic TypeScript matrix multiplication benchmarking, Python AST syntax tree extraction, and performance analysis inside an isolated microVM sandbox.
+4. **`examples/solari-career-autopilot-ts`**: Real-world autonomous ATS job application agent (Greenhouse, Lever, ApplyToJob) with candidate credentials tailoring and `rrweb` DOM recording audit trails.
 
-## Verification
-- All examples verified against `@solarisdk/sdk` (0.1.2) and `@solarisdk/browser` (0.1.1).
-- Includes graceful loopback proxy teardown via `await solari.close()`.
-- Includes sandbox lifecycle management via `await sandbox.kill()`.
-- Run time for each example is under 15 seconds.
+## Architectural Notes & Gotchas Handled
+- Proper loopback proxy teardown via `await solari.close()` to prevent Node.js event loop hanging.
+- Proper VM compute slot teardown via `await sandbox.kill()`.
+- Non-blocking server startup using background `nohup` execution.
+- All examples execute end-to-end in under 15 seconds.
+
+## Live Showcase
+- **Live Web Studio**: https://solari-cookbook-rash.vercel.app
+- **Benchmarks**: https://github.com/kprsnt2/solari-cookbook-rash/blob/main/BENCHMARKS.md
 
 Created with passion for the Pinetree / Solari ecosystem by @kprsnt2 (https://kprsnt.in).
 ```
