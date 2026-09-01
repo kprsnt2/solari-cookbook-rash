@@ -1,15 +1,8 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "framework": null,
-  "public": true,
-  "buildCommand": "npm run build",
   "outputDirectory": "projects/solari-autonomous-engineer/src/web/public",
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  },
   "routes": [
     {
       "src": "/api/health",
