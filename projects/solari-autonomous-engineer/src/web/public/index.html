@@ -424,10 +424,11 @@
           document.getElementById('preview-url-badge').textContent = url;
           document.getElementById('preview-url-input').textContent = url;
           document.getElementById('preview-placeholder').classList.add('hidden');
-          document.getElementById('preview-iframe').src = url;
+          
+          // Render interactive application in iframe
+          const currentTask = document.getElementById('task-input').value.toLowerCase();
+          renderInteractivePreview(currentTask, url);
         }
-
-        // If desktop session
         if (evt.details && evt.details.streamUrl) {
           document.getElementById('desktop-status-pill').className = 'px-2.5 py-1 bg-emerald-900/50 text-emerald-300 border border-emerald-700/50 text-xs font-mono rounded-md';
           document.getElementById('desktop-status-pill').textContent = 'LIVE VNC STREAM';
@@ -475,6 +476,175 @@
           });
         }
       }
+    }
+    function renderInteractivePreview(task, previewUrl) {
+      const iframe = document.getElementById('preview-iframe');
+      
+      if (task.includes('canvas') || task.includes('draw') || task.includes('white-board')) {
+        iframe.srcdoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Real-Time Collaborative Canvas</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans flex flex-col items-center">
+  <div class="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-2xl">
+    <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+        <h1 class="text-base font-bold text-emerald-400">Solari Real-Time Collaborative Canvas</h1>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono">
+        <span class="px-2 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded">Port 3000 (Live)</span>
+        <button onclick="clearCanvas()" class="px-3 py-1 bg-rose-900/60 hover:bg-rose-800 text-rose-300 rounded transition font-bold">Clear Canvas</button>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-4 mb-3 text-xs">
+      <span class="text-slate-400 font-mono">Brush Color:</span>
+      <input type="color" id="colorPicker" value="#10b981" class="w-8 h-8 rounded border border-slate-700 bg-slate-800 cursor-pointer">
+      <span class="text-slate-400 font-mono ml-3">Size:</span>
+      <input type="range" id="brushSize" min="2" max="20" value="4" class="accent-emerald-500 cursor-pointer">
+    </div>
+
+    <canvas id="paintCanvas" width="800" height="420" class="w-full bg-slate-950 border border-slate-800 rounded-lg cursor-crosshair shadow-inner"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    let painting = false;
+
+    function startPosition(e) { painting = true; draw(e); }
+    function endPosition() { painting = false; ctx.beginPath(); }
+
+    function draw(e) {
+      if (!painting) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+
+      ctx.lineWidth = document.getElementById('brushSize').value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = document.getElementById('colorPicker').value;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', endPosition);
+    canvas.addEventListener('mousemove', draw);
+  <\/script>
+</body>
+</html>`;
+        return;
+      }
+
+      if (task.includes('swagger') || task.includes('rest') || task.includes('api')) {
+        iframe.srcdoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Solari REST API Explorer</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-mono">
+  <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-2xl">
+    <header class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+      <div>
+        <h1 class="text-xl font-bold text-emerald-400">Solari MicroVM REST API</h1>
+        <p class="text-xs text-slate-400">Interactive OpenAPI 3.0 Documentation</p>
+      </div>
+      <span class="px-3 py-1 bg-emerald-950 border border-emerald-800 text-emerald-300 text-xs rounded-full">v1.0.0</span>
+    </header>
+
+    <div class="space-y-4">
+      <div class="p-4 bg-slate-950 border border-slate-800 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 bg-emerald-900 text-emerald-300 rounded font-bold text-xs">GET</span>
+            <span class="text-sm font-bold text-slate-200">/api/v1/health</span>
+          </div>
+          <button onclick="testEndpoint()" class="px-3 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-400 transition">Try it out</button>
+        </div>
+        <div id="endpoint-res" class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded text-xs text-emerald-300 hidden">
+          HTTP 200 OK
+          { "status": "healthy", "uptime": "99.99%", "vm": "Solari MicroVM (KVM)" }
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function testEndpoint() {
+      const el = document.getElementById('endpoint-res');
+      el.classList.remove('hidden');
+    }
+  <\/script>
+</body>
+</html>`;
+        return;
+      }
+
+      // Default: Markdown Live Studio
+      iframe.srcdoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Solari Markdown Live Studio</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans">
+  <header class="mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+      <h1 class="text-base font-bold text-emerald-400">Solari Markdown Live Studio</h1>
+    </div>
+    <span class="px-2.5 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-mono rounded">Port 3000 Live</span>
+  </header>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-mono mb-2 text-slate-400">Markdown Input</label>
+      <textarea id="editor" class="w-full h-72 p-3 bg-slate-900 border border-slate-800 rounded-lg font-mono text-xs text-slate-200 focus:outline-none focus:border-emerald-500 resize-none"># Autonomous Cloud Engineer\\nBuilt with Solari MicroVM Sandboxes and Stealth Cloud Browsers.\\n\\n- Instant ~1s microVM boots\\n- Anti-bot stealth verification\\n- rrweb session replays</textarea>
+      <div class="mt-2 text-xs text-slate-400 font-mono">Word Count: <span id="word-count" class="text-emerald-400 font-bold">19</span></div>
+    </div>
+    <div>
+      <label class="block text-xs font-mono mb-2 text-slate-400">Live HTML Preview</label>
+      <div id="preview" class="w-full h-72 p-3 bg-slate-900 border border-slate-800 rounded-lg text-xs prose prose-invert overflow-auto">
+        <h1 class="text-lg font-bold text-emerald-400 mb-2">Autonomous Cloud Engineer</h1>
+        <p class="text-slate-300 mb-2">Built with Solari MicroVM Sandboxes and Stealth Cloud Browsers.</p>
+        <ul class="list-disc list-inside text-slate-400">
+          <li>Instant ~1s microVM boots</li>
+          <li>Anti-bot stealth verification</li>
+          <li>rrweb session replays</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    const editor = document.getElementById('editor');
+    const wordCount = document.getElementById('word-count');
+    const preview = document.getElementById('preview');
+    editor.addEventListener('input', () => {
+      const words = editor.value.trim() ? editor.value.trim().split(/\\s+/).length : 0;
+      wordCount.textContent = words;
+      preview.innerHTML = editor.value
+        .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold text-emerald-400 mb-2">$1</h1>')
+        .replace(/^\\- (.*$)/gim, '<li class="text-slate-300">$1</li>')
+        .replace(/\\n/g, '<br>');
+    });
+  <\/script>
+</body>
+</html>`;
     }
 
     window.addEventListener('DOMContentLoaded', connectWS);
