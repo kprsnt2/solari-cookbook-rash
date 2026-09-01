@@ -258,12 +258,13 @@ export class AutonomousEngineer {
         while (currentStep <= this.maxSteps) {
           const completion = await this.callLLM(messages);
 
-          if (completion.content) {
-            logStep("plan", completion.content);
-            messages.push({ role: "assistant", content: completion.content });
-          }
-
           if (completion.tool_calls && completion.tool_calls.length > 0) {
+            messages.push({
+              role: "assistant",
+              content: completion.content || "",
+              tool_calls: completion.tool_calls,
+            });
+
             for (const call of completion.tool_calls) {
               const toolResult = await this.executeTool(call, logStep);
 
@@ -286,13 +287,15 @@ export class AutonomousEngineer {
               });
             }
           } else {
-            // No more tool calls; finished
+            if (completion.content) {
+              logStep("plan", completion.content);
+              messages.push({ role: "assistant", content: completion.content });
+            }
             finalArtifact = completion.content;
             break;
           }
         }
       }
-
       // If browser QA ran, retrieve replay
       if (this.browserQA.id) {
         logStep("browser_qa", `Downloading rrweb replay events for session ${this.browserQA.id}...`);
