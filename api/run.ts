@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const engineer = new AutonomousEngineer({
     provider: provider as LLMProvider,
-    model,
+    model: model || (provider === "openai" ? "gpt-5.4-mini" : undefined),
     maxSteps: Number(maxSteps),
     solariApiKey: process.env.SOLARI_API_KEY,
     apiKey: getProviderApiKey(provider),

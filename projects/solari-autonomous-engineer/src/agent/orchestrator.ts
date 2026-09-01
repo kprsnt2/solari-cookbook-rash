@@ -174,7 +174,7 @@ export class AutonomousEngineer {
   private defaultModelForProvider(provider: LLMProvider): string {
     const models: Record<LLMProvider, string> = {
       anthropic: "claude-3-7-sonnet-20250219",
-      openai: "gpt-4o-mini",
+      openai: "gpt-5.4-mini",
       gemini: "gemini-2.5-flash",
       groq: "llama-3.3-70b-versatile",
       openrouter: "anthropic/claude-3.5-sonnet",
