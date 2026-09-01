@@ -11,9 +11,8 @@ Built by **Prashanth Kumar Kadasi** ([kprsnt.in](https://kprsnt.in) | [@kprsnt2]
 >
 > Today, I'm open-sourcing **Solari-Agent**: an Autonomous Cloud Software Engineer powered by @getsolari's 3 cloud primitives: MicroVM Sandboxes, Stealth Cloud Browsers, and Cloud Desktops.
 >
-> 🌐 Live Web Studio: https://solari-cookbook-rash.vercel.app  
+> 🌐 Live Web Studio: https://solari.kprsnt.in (or https://solari-cookbook-rash.vercel.app)  
 > 🔗 Code: https://github.com/kprsnt2/solari-cookbook-rash  
->
 > CC @harrychow_ #AI #Solari #BuildInPublic
 
 ---
@@ -87,10 +86,8 @@ Built by **Prashanth Kumar Kadasi** ([kprsnt.in](https://kprsnt.in) | [@kprsnt2]
 > • `solari_sandbox_file_write` / `file_read`  
 > • `solari_sandbox_preview_port`  
 > • `solari_browser_stealth_test`  
-> • `solari_desktop_launch`  
-
----
-
+> 🌐 **Live Web Studio**: https://solari.kprsnt.in  
+> 🔗 **GitHub Fork**: https://github.com/kprsnt2/solari-cookbook-rash  
 ### Tweet 7 (Try it Live & Upstream Cookbook)
 > Try the live Web Studio, inspect the benchmarks, or fork the repository:
 >
@@ -130,9 +127,8 @@ Launches full X11 desktop environments with live embeddable VNC streams for real
 We also integrated an autonomous job application copilot (`npm run career`) that takes candidate credentials, tailors application materials inside a microVM sandbox, and uses stealth browsers to navigate Greenhouse, Lever, and ApplyToJob portals with rrweb session recording audit trails.
 
 Additionally contributed:
-• @solari/mcp-server: Model Context Protocol server exposing Solari to Claude Desktop & Cursor.
-• Interactive Web Studio: Live real-time dashboard with terminal streaming, iframe previews, and rrweb replay player.
-• 4 New TypeScript Cookbook Quickstarts.
+🌐 Live Web Studio: https://solari.kprsnt.in
+🔗 GitHub Repository: https://github.com/kprsnt2/solari-cookbook-rash
 
 🌐 Live Web Studio: https://solari-cookbook-rash.vercel.app
 🔗 GitHub Repository: https://github.com/kprsnt2/solari-cookbook-rash

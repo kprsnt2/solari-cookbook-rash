@@ -2,8 +2,8 @@
 
 > **Flagship submission for the Pinetree Research $300K SWE Challenge**  
 > Developed by **Prashanth** ([kprsnt.in](https://kprsnt.in) | [@kprsnt2](https://github.com/kprsnt2))  
+> 🌐 **Live Web Studio**: [solari.kprsnt.in](https://solari.kprsnt.in) (or [solari-cookbook-rash.vercel.app](https://solari-cookbook-rash.vercel.app))  
 > Evolved from **MyLocalCLI** (26 developer tools, 6 LLM providers) into cloud-native autonomous compute orchestration on [Solari](https://getsolari.com).
-
 ---
 
 ## ⚡ Overview
