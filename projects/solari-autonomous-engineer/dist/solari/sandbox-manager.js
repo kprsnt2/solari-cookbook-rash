@@ -59,8 +59,9 @@ export class SandboxManager {
      * Does NOT interpret shell expansions unless executed via 'sh' / 'bash'.
      */
     async execCommand(cmd, args = []) {
+        const fullCmd = `${cmd} ${args.join(" ")}`.trim();
+        const isServerCmd = (fullCmd.includes("server") || fullCmd.includes("http.server") || fullCmd.includes("listen") || fullCmd.includes("dev")) && !fullCmd.endsWith("&");
         if (this.isSimulated || !this.sandbox) {
-            // Basic simulation for common tools
             if (cmd === "sh" || cmd === "bash") {
                 const script = args[1] || args[0] || "";
                 return {
@@ -75,12 +76,44 @@ export class SandboxManager {
                 stderr: "",
             };
         }
-        const res = await this.sandbox.commands.run(cmd, { args });
-        return {
-            exitCode: res.exitCode ?? 0,
-            stdout: res.stdout || "",
-            stderr: res.stderr || "",
-        };
+        // Auto-background persistent servers to prevent commands.run from blocking indefinitely
+        let actualCmd = cmd;
+        let actualArgs = args;
+        if (isServerCmd) {
+            actualCmd = "sh";
+            actualArgs = ["-c", `nohup ${fullCmd} >/dev/null 2>&1 &`];
+        }
+        // 15-second safety timeout guard
+        const runPromise = this.sandbox.commands.run(actualCmd, { args: actualArgs });
+        const { promise: timeoutPromise, resolve: resolveTimeout } = Promise.withResolvers();
+        const timer = setTimeout(() => {
+            resolveTimeout({
+                exitCode: 0,
+                stdout: `[Command timed out or backgrounded after 15s]\n`,
+                stderr: "",
+            });
+        }, 15000);
+        try {
+            const res = await Promise.race([
+                runPromise.then((r) => ({
+                    exitCode: r.exitCode ?? 0,
+                    stdout: r.stdout || "",
+                    stderr: r.stderr || "",
+                })),
+                timeoutPromise,
+            ]);
+            clearTimeout(timer);
+            return res;
+        }
+        catch (err) {
+            clearTimeout(timer);
+            const msg = err instanceof Error ? err.message : String(err);
+            return {
+                exitCode: 1,
+                stdout: "",
+                stderr: msg,
+            };
+        }
     }
     /**
      * Convenience helper to run a full shell command line inside the microVM.
