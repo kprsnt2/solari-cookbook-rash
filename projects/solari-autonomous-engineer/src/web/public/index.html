@@ -246,10 +246,9 @@
   <script>
     let ws;
     let stepCount = 0;
-
     let wsAttempts = 0;
     function connectWS() {
-      if (wsAttempts > 2) {
+      if (window.location.hostname.includes('vercel.app')) {
         document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-400';
         document.getElementById('ws-status').textContent = 'Cloud Serverless Mode';
         return;
@@ -312,10 +311,13 @@
     }
 
     async function executeTask() {
-      const selectedVal = document.getElementById('provider-select').value.split(':');
-      const provider = selectedVal[0];
-      const model = selectedVal[1];
+      const taskInput = document.getElementById('task-input');
+      const task = taskInput ? taskInput.value.trim() : '';
       if (!task) return;
+
+      const selectedVal = document.getElementById('provider-select').value.split(':');
+      const provider = selectedVal[0] || 'simulator';
+      const model = selectedVal[1] || 'gpt-5.4-mini';
 
       const runBtn = document.getElementById('run-btn');
       runBtn.disabled = true;
@@ -323,7 +325,18 @@
 
       stepCount = 0;
       document.getElementById('timeline-container').innerHTML = '';
-      document.getElementById('terminal-content').innerHTML = '<p class="text-emerald-400 font-bold">[Solari Sandbox Initialized]</p>';
+      document.getElementById('terminal-content').innerHTML = '<p class="text-emerald-400 font-bold">[Solari Sandbox Initializing...]</p>';
+
+      handleServerMessage({
+        type: 'step',
+        event: {
+          step: 1,
+          timestamp: new Date().toISOString(),
+          phase: 'plan',
+          action: `Initiated autonomous pipeline: "${task}" (${provider} / ${model})`,
+          details: { provider, model }
+        }
+      });
 
       try {
         const res = await fetch('/api/run', {
@@ -331,14 +344,33 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ task, provider, model })
         });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          let errJson;
+          try { errJson = JSON.parse(errText); } catch(e) {}
+          throw new Error(errJson?.error || `Server responded with ${res.status}: ${errText.substring(0, 150)}`);
+        }
+
         const result = await res.json();
         if (result && result.steps) {
+          document.getElementById('timeline-container').innerHTML = '';
           result.steps.forEach(s => handleServerMessage({ type: 'step', event: s }));
           handleServerMessage({ type: 'run_complete', result });
         }
       } catch (err) {
         console.error(err);
-      }
+        handleServerMessage({
+          type: 'step',
+          event: {
+            step: stepCount + 1,
+            timestamp: new Date().toISOString(),
+            phase: 'error',
+            action: `Execution error: ${err.message || String(err)}`,
+            details: { error: err.message || String(err) }
+          }
+        });
+      } finally {
         runBtn.disabled = false;
         runBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Launch Autonomous Engineer</span>';
       }

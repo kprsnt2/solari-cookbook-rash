@@ -27,6 +27,10 @@
     "rrweb",
     "playwright"
   ],
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.2"
+  },
   "author": "Prashanth (@kprsnt2 / kprsnt.in)",
   "license": "MIT"
 }

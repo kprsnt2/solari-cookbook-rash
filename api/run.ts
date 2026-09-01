@@ -1,25 +1,56 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { AutonomousEngineer, type LLMProvider } from "../projects/solari-autonomous-engineer/src/agent/orchestrator.js";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+interface CustomRequest extends IncomingMessage {
+  body?: Record<string, unknown>;
+}
+
+interface CustomResponse extends ServerResponse {
+  json: (data: unknown) => void;
+  status: (statusCode: number) => CustomResponse;
+}
+
+export default async function handler(req: CustomRequest, res: CustomResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    res.status(200).end();
+    res.statusCode = 200;
+    res.end();
     return;
   }
 
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method Not Allowed" });
+    res.setHeader("Content-Type", "application/json");
+    res.statusCode = 405;
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
     return;
   }
 
-  const { task, provider = "openai", model, maxSteps = 15 } = req.body || {};
+  // Parse body if not pre-parsed by Vercel
+  let bodyData: Record<string, unknown> = req.body || {};
+  if (!req.body) {
+    try {
+      const chunks: Buffer[] = [];
+      for await (const chunk of req) {
+        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+      }
+      const rawText = Buffer.concat(chunks).toString("utf-8");
+      if (rawText) {
+        bodyData = JSON.parse(rawText);
+      }
+    } catch {
+      bodyData = {};
+    }
+  }
+
+  const { task, provider = "openai", model, maxSteps = 15 } = bodyData;
 
   if (!task || typeof task !== "string") {
-    res.status(400).json({ error: "Task description is required" });
+    res.setHeader("Content-Type", "application/json");
+    res.statusCode = 400;
+    res.end(JSON.stringify({ error: "Task description is required" }));
     return;
   }
 
@@ -34,17 +65,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const engineer = new AutonomousEngineer({
     provider: provider as LLMProvider,
-    model: model || (provider === "openai" ? "gpt-5.4-mini" : undefined),
-    maxSteps: Number(maxSteps),
+    model: typeof model === "string" ? model : (provider === "openai" ? "gpt-5.4-mini" : undefined),
+    maxSteps: Number(maxSteps) || 15,
     solariApiKey: process.env.SOLARI_API_KEY,
-    apiKey: getProviderApiKey(provider),
+    apiKey: getProviderApiKey(String(provider)),
   });
 
   try {
     const result = await engineer.runTask(task);
-    res.status(200).json(result);
+    res.setHeader("Content-Type", "application/json");
+    res.statusCode = 200;
+    res.end(JSON.stringify(result));
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    res.status(500).json({ error: errMsg });
+    res.setHeader("Content-Type", "application/json");
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: errMsg }));
   }
 }

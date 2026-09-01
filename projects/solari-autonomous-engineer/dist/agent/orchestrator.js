@@ -490,7 +490,29 @@ server.listen(3000, () => console.log('Server listening on port 3000'));
                 }),
             });
             if (!res.ok) {
-                throw new Error(`LLM call failed (${res.status}): ${await res.text()}`);
+                const errBody = await res.text();
+                if (res.status === 404 || errBody.includes("model") || errBody.includes("does not exist")) {
+                    console.warn(`[Orchestrator] Model ${this.model} returned error, falling back to gpt-4o-mini.`);
+                    const fallbackRes = await fetch(`${baseUrl}/chat/completions`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${this.apiKey}`,
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-4o-mini",
+                            messages,
+                            tools: SOLARI_TOOLS,
+                            tool_choice: "auto",
+                        }),
+                    });
+                    if (fallbackRes.ok) {
+                        const fallbackJson = (await fallbackRes.json());
+                        const fMsg = fallbackJson.choices?.[0]?.message;
+                        return { content: fMsg?.content || undefined, tool_calls: fMsg?.tool_calls || undefined };
+                    }
+                }
+                throw new Error(`LLM call failed (${res.status}): ${errBody}`);
             }
             const json = (await res.json());
             const msg = json.choices?.[0]?.message;
