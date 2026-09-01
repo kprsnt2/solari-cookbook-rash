@@ -27,6 +27,11 @@
     "rrweb",
     "playwright"
   ],
+  "dependencies": {
+    "@solarisdk/browser": "^0.1.1",
+    "@solarisdk/sdk": "^0.1.2",
+    "dotenv": "^16.4.7"
+  },
   "devDependencies": {
     "@types/node": "^22.10.7",
     "typescript": "^5.7.2"
