@@ -23,12 +23,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const getProviderApiKey = (p: string) => {
+    if (p === "openai") return process.env.OPENAI_API_KEY;
+    if (p === "anthropic") return process.env.ANTHROPIC_API_KEY;
+    if (p === "gemini") return process.env.GEMINI_API_KEY;
+    if (p === "groq") return process.env.GROQ_API_KEY;
+    if (p === "openrouter") return process.env.OPENROUTER_API_KEY;
+    return undefined;
+  };
+
   const engineer = new AutonomousEngineer({
     provider: provider as LLMProvider,
     model,
     maxSteps: Number(maxSteps),
     solariApiKey: process.env.SOLARI_API_KEY,
-    apiKey: provider === "openai" ? process.env.OPENAI_API_KEY : undefined,
+    apiKey: getProviderApiKey(provider),
   });
 
   try {

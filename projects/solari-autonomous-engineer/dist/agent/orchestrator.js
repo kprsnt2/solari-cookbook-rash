@@ -152,7 +152,7 @@ export class AutonomousEngineer {
     defaultModelForProvider(provider) {
         const models = {
             anthropic: "claude-3-7-sonnet-20250219",
-            openai: "gpt-4o",
+            openai: "gpt-4o-mini",
             gemini: "gemini-2.5-flash",
             groq: "llama-3.3-70b-versatile",
             openrouter: "anthropic/claude-3.5-sonnet",
